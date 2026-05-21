@@ -22,7 +22,7 @@ export function setSiblingWrapper(wrapper: (sibling: ReactNode) => ReactNode) {
   siblingWrapper = wrapper;
 }
 
-const { manager: defaultManager } = wrapRootComponent(
+const { Root, manager: defaultManager } = wrapRootComponent(
   ChildrenWrapper,
   renderSibling
 );
@@ -40,6 +40,8 @@ function getActiveManager(id: string | number | symbol): RootSiblingManager {
 
   return defaultManager;
 }
+
+export { Root as DefaultRootSiblingParent };
 
 export default class RootSiblingsManager {
   private id: string;
