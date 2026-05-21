@@ -7,7 +7,10 @@ import React, {
 } from 'react';
 
 import ChildrenWrapper from './ChildrenWrapper';
-import wrapRootComponent, { RootSiblingManager } from './wrapRootComponent';
+import wrapRootComponent, {
+  DEFAULT_ID,
+  RootSiblingManager
+} from './wrapRootComponent';
 
 let siblingWrapper: (sibling: ReactNode) => ReactNode = sibling => sibling;
 
@@ -27,10 +30,10 @@ let uuid: number = 0;
 const managerStack: RootSiblingManager[] = [defaultManager];
 const inactiveManagers: Set<RootSiblingManager> = new Set();
 
-function getActiveManager(): RootSiblingManager {
+function getActiveManager(id: string | number | symbol): RootSiblingManager {
   for (let i = managerStack.length - 1; i >= 0; i--) {
     const manager = managerStack[i];
-    if (!inactiveManagers.has(manager)) {
+    if (!inactiveManagers.has(manager) && manager.id === id) {
       return manager;
     }
   }
@@ -42,9 +45,13 @@ export default class RootSiblingsManager {
   private id: string;
   private manager: RootSiblingManager;
 
-  constructor(element: ReactNode, callback?: () => void) {
+  constructor(
+    element: ReactNode,
+    callback?: () => void,
+    id: string | number | symbol = DEFAULT_ID
+  ) {
     this.id = `root-sibling-${uuid + 1}`;
-    this.manager = getActiveManager();
+    this.manager = getActiveManager(id);
     this.manager.update(this.id, element, callback);
     uuid++;
   }
@@ -61,15 +68,17 @@ export default class RootSiblingsManager {
 export function RootSiblingParent(props: {
   children: ReactNode;
   inactive?: boolean;
+  id?: string | number | symbol;
 }) {
-  const { inactive } = props;
+  const { inactive, id } = props;
   const [sibling] = useState<{
     Root: ComponentType<PropsWithChildren>;
     manager: RootSiblingManager;
   }>(() => {
     const { Root: parentRoot, manager: parentManager } = wrapRootComponent(
       ChildrenWrapper,
-      renderSibling
+      renderSibling,
+      id
     );
 
     managerStack.push(parentManager);
