@@ -3,14 +3,18 @@ import React, { ComponentType, PropsWithChildren, ReactNode } from 'react';
 import RootController from './RootController';
 import RootSiblings from './RootSiblings';
 
+export const DEFAULT_ID = Symbol();
+
 export interface RootSiblingManager {
+  id: number | string | symbol;
   update(id: string, element: ReactNode, callback?: () => void): void;
   destroy(id: string, callback?: () => void): void;
 }
 
 export default function wrapRootComponent<T extends PropsWithChildren>(
   Root: ComponentType<T>,
-  renderSibling?: (sibling: ReactNode) => ReactNode
+  renderSibling?: (sibling: ReactNode) => ReactNode,
+  id: number | string | symbol = DEFAULT_ID
 ): {
   Root: ComponentType<T>;
   manager: RootSiblingManager;
@@ -26,6 +30,7 @@ export default function wrapRootComponent<T extends PropsWithChildren>(
       );
     },
     manager: {
+      id,
       update(id: string, element: ReactNode, callback?: () => void) {
         controller.update(id, element, callback);
       },
